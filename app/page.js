@@ -1,110 +1,206 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollToPlugin } from "gsap/dist/ScrollToPlugin";
+import { useRef, useState, useEffect } from "react";
 
-import HeroSection from "./components/main/section1";
-import ServicesSection from "./components/main/section2";
-import WebAppSection from "./components/main/section3";
+// Components
+import HeroSection from "./components/main/sectionHero";
+import BrandInterlude from "./components/main/interlude";
+import ServicesSection from "./components/main/sectionServices";
+import WebSection from "./components/main/sectionWeb";
+import FinalSection from "./components/main/sectionFinal";
+import SideNav from "./components/shared/SideNav";
+import AISection from "./components/main/sectionAI";
+import ScheduleCallModal from "./components/shared/ScheduleCallModal";
+// Hooks
+import { useFullpageScroll } from "./hooks/useFullPageScroll";
+
+const navItems = [
+  {
+    step: 0,
+    label: "Home",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 10.5 12 4l8 6.5V20a2 2 0 0 1-2 2h-4v-6H10v6H6a2 2 0 0 1-2-2v-9.5Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+      </svg>
+    ),
+  },
+  {
+    step: 1,
+    label: "Interlude",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 7h16M4 12h16M4 17h10"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    step: 2,
+    label: "Web/App Studio",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 5h16v14H4V5Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+        <path
+          d="M4 9h16"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+        <path
+          d="M7 13h6M7 16h9"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    step: 3,
+    label: "AI Systems",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M9 3h6v4H9V3Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+        <path
+          d="M7 7h10v14H7V7Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+        <path
+          d="M10 11h4M10 15h4"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+
+  {
+    step: 4,
+    label: "Managed IT",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 6h16v10H4V6Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+        <path
+          d="M8 20h8"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    step: 5,
+    label: "Contact",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 6h16v12H4V6Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+        <path
+          d="m4 7 8 6 8-6"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+];
+
+
 
 export default function Home() {
-  const heroWrapperRef = useRef(null);
-  const servicesWrapperRef = useRef(null);
-  const webWrapperRef = useRef(null);
 
-  // 0 = Hero
-  // 1 = Section2 Part 1
-  // 2 = Section2 Part 2
-  // 3 = Section3 (Web/App)
-  const [step, setStep] = useState(0);
-  const stepRef = useRef(0);
-  const isAnimatingRef = useRef(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
-  const MAX_STEP = 3;
+  const heroRef = useRef(null);
+  const interludeRef = useRef(null);
+  const aiRef = useRef(null);
+  const webRef = useRef(null);
+  const itRef = useRef(null);
+  const finalRef = useRef(null);
+  // const servicesRef = useRef(null);
+  // const securityRef = useRef(null);
+  // const aboutRef = useRef(null);
+  // const servicesGridRef = useRef(null);
+  // const proofRef = useRef(null);
+  // const contactRef = useRef(null);
+  const maxStep = 5;
+
+  const { step, goToStep } = useFullpageScroll({
+    maxStep,
+    duration: 2,
+    cooldown: 1,
+    getTargetY: (s) => {
+      if (s === 0) return heroRef.current?.offsetTop ?? 0;
+      if (s === 1) return interludeRef.current?.offsetTop ?? window.innerHeight;
+      if (s === 2) return webRef.current?.offsetTop ?? window.innerHeight * 2;
+      if (s === 3) return aiRef.current?.offsetTop ?? window.innerHeight * 3;
+      if (s === 4) return itRef.current?.offsetTop ?? window.innerHeight * 4;
+      if (s === 5) return finalRef.current?.offsetTop ?? window.innerHeight * 5;
+      return 0;
+    },
+  });
+  
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      gsap.registerPlugin(ScrollToPlugin);
-    }
-
-    const handleWheel = (e) => {
-      const deltaY = e.deltaY;
-
-      if (Math.abs(deltaY) < 10) return;
-
-      if (isAnimatingRef.current) {
-        e.preventDefault();
-        return;
-      }
-
-      const direction = deltaY > 0 ? 1 : -1;
-      let nextStep = stepRef.current + direction;
-
-      if (nextStep < 0 || nextStep > MAX_STEP) {
-        return;
-      }
-
-      e.preventDefault();
-
-      if (nextStep === stepRef.current) return;
-
-      stepRef.current = nextStep;
-      setStep(nextStep);
-
-      const heroEl = heroWrapperRef.current;
-      const servicesEl = servicesWrapperRef.current;
-      const webEl = webWrapperRef.current;
-
-      let targetY = 0;
-
-      if (nextStep === 0) {
-        targetY = heroEl ? heroEl.offsetTop : 0;
-      } else if (nextStep === 1 || nextStep === 2) {
-        targetY = servicesEl ? servicesEl.offsetTop : window.innerHeight;
-      } else if (nextStep === 3) {
-        targetY = webEl ? webEl.offsetTop : window.innerHeight * 2;
-      }
-
-      isAnimatingRef.current = true;
-
-      gsap.to(window, {
-        duration: 1,
-        scrollTo: { y: targetY, autoKill: false },
-        ease: "power2.inOut",
-        onComplete: () => {
-          setTimeout(() => {
-            isAnimatingRef.current = false;
-          }, 300);
-        },
-      });
+    const onGotoStep = (e) => {
+      const next = Number(e?.detail?.step);
+      if (Number.isNaN(next)) return;
+      goToStep(next);
     };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
-
+  
+    const onOpenContact = () => setContactOpen(true);
+  
+    window.addEventListener("bf:gotoStep", onGotoStep);
+    window.addEventListener("bf:openContact", onOpenContact);
+  
     return () => {
-      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("bf:gotoStep", onGotoStep);
+      window.removeEventListener("bf:openContact", onOpenContact);
     };
-  }, []);
-
-  // Section2 part:
-  // step 1 => Part 1
-  // step 2+ => Part 2 (when we’re leaving it, it can stay on Part2)
-  const activePartForServices = step <= 1 ? 0 : 1;
+  }, [goToStep]);
 
   return (
     <main className="min-h-screen bg-bf-bg text-slate-100">
-      <div ref={heroWrapperRef}>
-        <HeroSection />
-      </div>
+<SideNav step={step} items={navItems} />
+<div ref={heroRef}><HeroSection isActive={step === 0} /></div>
+<div ref={interludeRef}><BrandInterlude isActive={step === 1} /></div>
 
-      <div ref={servicesWrapperRef}>
-        <ServicesSection activePart={activePartForServices} />
-      </div>
+<div ref={webRef}><WebSection isActive={step === 2} /></div>
+<div ref={aiRef}>
+  <AISection isActive={step === 3} />
+</div>
 
-      <div ref={webWrapperRef}>
-        <WebAppSection />
-      </div>
+<div ref={itRef}><ServicesSection isActive={step === 4}/></div>
+<div ref={finalRef}><FinalSection isActive={step === 5} /></div>
+
+<ScheduleCallModal open={contactOpen} onClose={() => setContactOpen(false)} />
+
     </main>
   );
 }
