@@ -1,0 +1,22 @@
+name: Sync ramtin to GitLab
+
+on:
+  push:
+    branches: [ramtin]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push ramtin to GitLab
+        env:
+          GITLAB_USERNAME: ${{ secrets.GITLAB_USERNAME }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_REPO: ${{ secrets.GITLAB_REPO }}
+        run: |
+          git remote add gitlab "https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@${GITLAB_REPO#https://}"
+          git push gitlab ramtin:ramtin

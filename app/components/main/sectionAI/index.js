@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import Automation from "@/public/lottie/Automation.json";
+import WebApp from "@/public/lottie/WebApp.json";
 
 export default function AISection({ isActive }) {
   const rootRef = useRef(null);
