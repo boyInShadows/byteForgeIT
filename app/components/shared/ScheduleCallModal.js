@@ -14,7 +14,8 @@ export default function ScheduleCallModal({ open, onClose }) {
     setLoading(true);
     setError("");
 
-    const form = new FormData(e.currentTarget);
+    const formElement = e.currentTarget;
+    const form = new FormData(formElement);
     const payload = {
       name: form.get("name"),
       email: form.get("email"),
@@ -35,7 +36,7 @@ export default function ScheduleCallModal({ open, onClose }) {
       if (!res.ok) throw new Error(data?.error || "Failed to send");
 
       setSent(true);
-      e.currentTarget.reset();
+      formElement.reset();
       setTimeout(() => {
         setSent(false);
         onClose?.();
